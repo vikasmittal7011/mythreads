@@ -11,8 +11,8 @@ const UserSehema = Schema(
     password: { type: String, required: true, minLenght: 8 },
     image: { type: String, default: "" },
     bio: { type: String, default: "" },
-    followers: { type: String, default: [] },
-    following: { type: String, default: [] },
+    followers: [{ type: String }],
+    following: [{ type: String }],
   },
   { timestamps: true }
 );
