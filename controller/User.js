@@ -73,4 +73,45 @@ const logoutUser = (req, res, next) => {
   }
 };
 
-export { signupUser, loginUser, logoutUser };
+const followUnfollowUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const modifyingUser = await User.findById({ _id: id });
+    const modifyerUser = await User.findById({ _id: req.id });
+
+    if (id === req.id)
+      return next(new HttpError("You can't follow/unfollow your self", 401));
+
+    if (!modifyerUser || !modifyingUser)
+      return next(new HttpError("Bad request", 404));
+
+    const isFollow = modifyingUser.followers.includes(req.id);
+
+    if (isFollow) {
+      await User.findByIdAndUpdate(
+        { _id: id },
+        { $pull: { followers: req.id } }
+      );
+      await User.findByIdAndUpdate(
+        { _id: req.id },
+        { $pull: { following: id } }
+      );
+      res.json({ success: true, message: "Successfully unfollow the user" });
+    } else {
+      await User.findByIdAndUpdate(
+        { _id: id },
+        { $push: { followers: req.id } }
+      );
+      await User.findByIdAndUpdate(
+        { _id: req.id },
+        { $push: { following: id } }
+      );
+      res.json({ success: true, message: "Successfully follow the user" });
+    }
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export { signupUser, loginUser, logoutUser, followUnfollowUser };
