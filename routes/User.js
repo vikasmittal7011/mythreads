@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   followUnfollowUser,
+  getProfile,
   loginUser,
   logoutUser,
   signupUser,
@@ -13,6 +14,7 @@ import userProtect from "../middlewares/protect.js";
 const router = Router();
 
 router
+  .get("/profile/:username", getProfile)
   .post("/", createUserValiation, signupUser)
   .post("/login", loginUser)
   .post("/logout", logoutUser)

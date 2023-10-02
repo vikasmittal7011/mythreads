@@ -150,4 +150,25 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-export { signupUser, loginUser, logoutUser, followUnfollowUser, updateUser };
+const getProfile = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username }).select("-passwrod");
+
+    if (!user) return next(new HttpError("User not found", 404));
+
+    res.json({ success: true, user });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export {
+  signupUser,
+  loginUser,
+  logoutUser,
+  followUnfollowUser,
+  updateUser,
+  getProfile,
+};
