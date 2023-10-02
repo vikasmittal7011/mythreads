@@ -41,4 +41,23 @@ const createPost = async (req, res, next) => {
   }
 };
 
-export { createPost, getPost };
+const deletePost = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+
+    const post = await Post.findById({ _id });
+
+    if (!post) return next(new HttpError("Post not found", 404));
+
+    if (post.postedBy.toString() !== req.id)
+      return next(new HttpError("You can't delete this post", 401));
+
+    await Post.findByIdAndRemove({ _id });
+
+    res.json({ success: true, post });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export { createPost, getPost, deletePost };
