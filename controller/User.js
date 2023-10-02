@@ -114,4 +114,40 @@ const followUnfollowUser = async (req, res, next) => {
   }
 };
 
-export { signupUser, loginUser, logoutUser, followUnfollowUser };
+const updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const userData = req.body;
+
+    if (req.id !== id)
+      return next(
+        new HttpError("You are not right user to update profile", 401)
+      );
+
+    const users = await User.findOne({
+      $or: [{ username: userData.username }, { email: userData.email }],
+    });
+
+    if (users) {
+      if (users?._id?.toString() !== id) {
+        return next(
+          new HttpError(
+            "Enable to update user username or email is already exsist",
+            401
+          )
+        );
+      }
+    }
+
+    const user = await User.findByIdAndUpdate({ _id: req.id }, userData, {
+      new: true,
+    });
+
+    if (user) res.json({ success: true, userData });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export { signupUser, loginUser, logoutUser, followUnfollowUser, updateUser };
