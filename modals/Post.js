@@ -8,9 +8,9 @@ const PostSehema = Schema(
       ref: "User",
       required: true,
     },
-    text: { type: String, required: true },
+    text: { type: String, required: true, maxLength: 500 },
+    img: { type: String, default: "" },
     likes: { type: Number, default: 0 },
-
     replies: [
       {
         userId: { type: ObjectId, ref: "User", required: true },
