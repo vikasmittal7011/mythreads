@@ -2,6 +2,23 @@ import { validationResult } from "express-validator";
 import HttpError from "../modals/http-error.js";
 import { Post } from "../modals/Post.js";
 
+const getPost = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+
+    const post = await Post.findById({ _id }).populate({
+      path: "postedBy",
+      select: "name username image",
+    });
+
+    if (!post) return next(new HttpError("Post not found", 404));
+
+    res.json({ success: true, post });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
 const createPost = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -24,4 +41,4 @@ const createPost = async (req, res, next) => {
   }
 };
 
-export { createPost };
+export { createPost, getPost };

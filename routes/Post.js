@@ -1,11 +1,13 @@
 import { Router } from "express";
 
-import { createPost } from "../controller/Post.js";
-import userProtect from "../middlewares/protect.js";
+import { createPost, getPost } from "../controller/Post.js";
 import { createPostsValiation } from "../validation/postValid.js";
+import userProtect from "../middlewares/protect.js";
 
 const router = Router();
 
-router.post("/", userProtect, createPostsValiation, createPost);
+router
+  .get("/:_id", getPost)
+  .post("/", userProtect, createPostsValiation, createPost);
 
 export default router;
