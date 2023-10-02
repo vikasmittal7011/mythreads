@@ -10,7 +10,7 @@ const PostSehema = Schema(
     },
     text: { type: String, required: true, maxLength: 500 },
     img: { type: String, default: "" },
-    likes: { type: Number, default: 0 },
+    likes: [{ type: ObjectId, ref: "User" }],
     replies: [
       {
         userId: { type: ObjectId, ref: "User", required: true },
