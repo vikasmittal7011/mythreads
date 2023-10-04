@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import HttpError from "../modals/http-error.js";
 import { Post } from "../modals/Post.js";
+import { User } from "../modals/User.js";
 
 const getPost = async (req, res, next) => {
   try {
@@ -121,4 +122,22 @@ const deletePost = async (req, res, next) => {
   }
 };
 
-export { createPost, getPost, deletePost, likeAndUnlike, replies };
+const getFeed = async (req, res, next) => {
+  try {
+    const _id = req.id;
+
+    const user = await User.findOne({ _id });
+
+    if (!user) return next(new HttpError("User not found", 404));
+
+    const following = await user.following;
+
+    const posts = await Post.find({ postedBy: { $in: following } });
+
+    res.json({ success: true, posts });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export { createPost, getPost, deletePost, likeAndUnlike, replies, getFeed };
