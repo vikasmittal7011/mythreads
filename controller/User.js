@@ -86,7 +86,7 @@ const followUnfollowUser = async (req, res, next) => {
     if (!modifyerUser || !modifyingUser)
       return next(new HttpError("Bad request", 404));
 
-    const isFollow = modifyingUser.followers.includes(req.id);
+    const isFollow = modifyerUser.following.includes(id);
 
     if (isFollow) {
       await User.findByIdAndUpdate(
