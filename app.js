@@ -2,6 +2,7 @@ import express, { json } from "express";
 import cookieparser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import { v2 as cloundinary } from "cloudinary";
 
 dotenv.config();
 
@@ -15,9 +16,15 @@ import HttpError from "./modals/http-error.js";
 
 connection();
 
-app.use(json());
-app.use(cors());
+app.use(json({ limit: "10mb" }));
 app.use(cookieparser());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+
+cloundinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_PUBLIC,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 app.use("/api/user", user);
 app.use("/api/post", post);
@@ -27,22 +34,7 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
-  //   if (req.files) {
-  //     fs.unlink(req.files.thumbnail[0].path, (err) => {});
-  //     if (req.files.image1) {
-  //       fs.unlink(req.files.image1[0].path, (err) => {});
-  //     }
-  //     if (req.files.image2) {
-  //       fs.unlink(req.files.image2[0].path, (err) => {});
-  //     }
-  //     if (req.files.image3) {
-  //       fs.unlink(req.files.image3[0].path, (err) => {});
-  //     }
-  //     if (req.files.image4) {
-  //       fs.unlink(req.files.image4[0].path, (err) => {});
-  //     }
-  //   }
-  if (res.heardersSent) {
+  if (res.headersSent) {
     return next(error);
   }
   res

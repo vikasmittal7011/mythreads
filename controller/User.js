@@ -1,8 +1,8 @@
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
+import { v2 as cloudinary } from "cloudinary";
 
 import { User } from "../modals/User.js";
-import { validationResult } from "express-validator";
 import HttpError from "../modals/http-error.js";
 import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookies.js";
 
@@ -18,7 +18,7 @@ const signupUser = async (req, res, next) => {
   try {
     const { username, email, password, name } = req.body;
     user = await User.findOne({ $or: [{ username }, { email }] });
-    if (user) {
+    if (user && user.name) {
       return next(new HttpError("User is already exsist", 401));
     }
 
@@ -116,9 +116,10 @@ const followUnfollowUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = req.id;
 
-    const userData = req.body;
+    const { username, name, bio, email } = req.body;
+    let { image } = req.body;
 
     if (req.id !== id)
       return next(
@@ -126,7 +127,7 @@ const updateUser = async (req, res, next) => {
       );
 
     const users = await User.findOne({
-      $or: [{ username: userData.username }, { email: userData.email }],
+      $or: [{ username: username }, { email: email }],
     });
 
     if (users) {
@@ -140,11 +141,27 @@ const updateUser = async (req, res, next) => {
       }
     }
 
-    const user = await User.findByIdAndUpdate({ _id: req.id }, userData, {
-      new: true,
-    });
+    if (image) {
+      if (users.image !== image) {
+        if (users.image) {
+          await cloudinary.uploader.destroy(
+            users.image.split("/").pop().split(".")[0]
+          );
+        }
+        const cloundinaryResponse = await cloudinary.uploader.upload(image);
+        image = cloundinaryResponse.secure_url;
+      }
+    } else image = "";
 
-    if (user) res.json({ success: true, userData });
+    const user = await User.findByIdAndUpdate(
+      { _id: req.id },
+      { name, username, email, image, bio },
+      {
+        new: true,
+      }
+    ).select("username email name bio image");
+
+    if (user) res.json({ success: true, user });
   } catch (err) {
     return next(new HttpError(err.message, 500));
   }
@@ -164,6 +181,22 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const getUserProfile = async (req, res, next) => {
+  try {
+    const id = req.id;
+
+    const user = await User.findOne({ _id: id }).select(
+      "username name email image bio"
+    );
+
+    if (!user) return next(new HttpError("User not found", 404));
+
+    res.json({ success: true, user });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
 export {
   signupUser,
   loginUser,
@@ -171,4 +204,5 @@ export {
   followUnfollowUser,
   updateUser,
   getProfile,
+  getUserProfile,
 };

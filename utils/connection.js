@@ -5,6 +5,6 @@ export async function connection() {
     await connect(process.env.MONGODB_CONNECTION_URI);
     console.log("Connected");
   } catch (err) {
-    console.loh(err.message);
+    console.log(err.message);
   }
 }

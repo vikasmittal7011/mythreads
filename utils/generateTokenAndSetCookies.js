@@ -8,7 +8,7 @@ const generateTokenAndSetCookie = (id, res) => {
   res.cookie("jwt", token, {
     httpOnly: true,
     maxAge: 15 * 24 * 60 * 60 * 1000,
-    smaeSite: "strict",
+    sameSite: "strict",
   });
 
   return token;
