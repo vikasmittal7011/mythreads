@@ -5,6 +5,7 @@ import {
   deletePost,
   getFeed,
   getPost,
+  getUserPost,
   likeAndUnlike,
   replies,
 } from "../controller/Post.js";
@@ -15,6 +16,7 @@ const router = Router();
 
 router
   .get("/feed", userProtect, getFeed)
+  .get("/user-post/:id", getUserPost)
   .get("/:_id", getPost)
   .post("/", userProtect, createPostsValiation, createPost)
   .patch("/toggleLike/:_id", userProtect, likeAndUnlike)

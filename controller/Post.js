@@ -140,4 +140,27 @@ const getFeed = async (req, res, next) => {
   }
 };
 
-export { createPost, getPost, deletePost, likeAndUnlike, replies, getFeed };
+const getUserPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const posts = await Post.find({ postedBy: id }).populate({
+      path: "postedBy",
+      select: "name username image",
+    });
+
+    res.json({ success: true, posts });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+export {
+  createPost,
+  getPost,
+  deletePost,
+  likeAndUnlike,
+  replies,
+  getFeed,
+  getUserPost,
+};

@@ -29,6 +29,7 @@ const signupUser = async (req, res, next) => {
       return res.json({
         success: true,
         token,
+        id: user.id,
       });
     });
   } catch (error) {
@@ -58,9 +59,9 @@ const loginUser = async (req, res, next) => {
 
     const token = generateTokenAndSetCookie(_id, res);
 
-    res.json({ token, success: true });
+    res.json({ token, success: true, id: _id });
   } catch (err) {
-    return next(new HttpError(error.message, 422));
+    return next(new HttpError(err.message, 422));
   }
 };
 
@@ -107,7 +108,7 @@ const followUnfollowUser = async (req, res, next) => {
         { _id: req.id },
         { $push: { following: id } }
       );
-      res.json({ success: true, message: "Successfully follow the user" });
+      res.json({ success: true });
     }
   } catch (err) {
     return next(new HttpError(err.message, 500));

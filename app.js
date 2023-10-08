@@ -39,7 +39,7 @@ app.use((error, req, res, next) => {
   }
   res
     .status(error.errorCode || 500)
-    .json({ message: error.message || "Unknow error accour" || error.message });
+    .json({ message: error.message || "Unknow error accour" });
 });
 
 app.listen(5000);
