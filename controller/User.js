@@ -29,7 +29,7 @@ const signupUser = async (req, res, next) => {
       return res.json({
         success: true,
         token,
-        id: user.id,
+        user: { id: user.id, username: user.username },
       });
     });
   } catch (error) {
@@ -59,7 +59,11 @@ const loginUser = async (req, res, next) => {
 
     const token = generateTokenAndSetCookie(_id, res);
 
-    res.json({ token, success: true, id: _id });
+    res.json({
+      token,
+      success: true,
+      user: { id: _id, username: user.username },
+    });
   } catch (err) {
     return next(new HttpError(err.message, 422));
   }
