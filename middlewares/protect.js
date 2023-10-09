@@ -2,9 +2,10 @@ import jwt from "jsonwebtoken";
 
 const userProtect = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt || req.headers.authentication.split(" ")[1];
+    const token = req.cookies.jwt;
+    // const token = req.cookies.jwt || req.headers.authentication.split(" ")[1];
     if (!token) {
-      return res.json({ message: "Unauthorized" });
+      return res.json({ message: "Please Login First" });
     }
 
     const data = jwt.verify(token, process.env.JSONWEBTOKEN_KEY);

@@ -1,4 +1,6 @@
 import { validationResult } from "express-validator";
+import { v2 as cloudinary } from "cloudinary";
+
 import HttpError from "../modals/http-error.js";
 import { Post } from "../modals/Post.js";
 import { User } from "../modals/User.js";
@@ -7,10 +9,15 @@ const getPost = async (req, res, next) => {
   try {
     const { _id } = req.params;
 
-    const post = await Post.findById({ _id }).populate({
-      path: "postedBy",
-      select: "name username image",
-    });
+    const post = await Post.findById({ _id })
+      .populate({
+        path: "postedBy",
+        select: "name username image",
+      })
+      .populate({
+        path: "replies.userId",
+        select: "name image",
+      });
 
     if (!post) return next(new HttpError("Post not found", 404));
 
@@ -27,16 +34,25 @@ const createPost = async (req, res, next) => {
     return next(new HttpError(errorMessages, 422));
   }
   try {
+    const { text } = req.body;
+    let { img } = req.body;
     const id = req.id;
 
-    const post = new Post({ ...req.body, postedBy: id });
+    if (img) {
+      const cloundinaryResponse = await cloudinary.uploader.upload(img);
+      img = cloundinaryResponse.secure_url;
+    } else img = "";
+
+    const post = new Post({ text, postedBy: id, img });
 
     await post.save();
 
     if (!post)
       return next(new HttpError("Connot able to add post try again", 400));
 
-    res.json({ success: true, post });
+    const user = await User.findOne({ _id: id });
+
+    res.json({ success: true, post, username: user.username });
   } catch (err) {
     return next(new HttpError(err.message, 500));
   }
