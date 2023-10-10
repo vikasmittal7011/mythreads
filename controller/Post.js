@@ -27,6 +27,34 @@ const getPost = async (req, res, next) => {
   }
 };
 
+const getPosts = async (req, res, next) => {
+  try {
+    const posts = await Post.find()
+      .populate({
+        path: "postedBy",
+        select: "name username image",
+      })
+      .populate({
+        path: "replies.userId",
+        select: "name image",
+      })
+      .sort({ createdAt: "-1" });
+
+    const shuffledPosts = [...posts];
+    for (let i = shuffledPosts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledPosts[i], shuffledPosts[j]] = [
+        shuffledPosts[j],
+        shuffledPosts[i],
+      ];
+    }
+
+    res.json({ posts: shuffledPosts, success: true });
+  } catch (err) {
+    next(new HttpError(err.message, 500));
+  }
+};
+
 const createPost = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -148,7 +176,10 @@ const getFeed = async (req, res, next) => {
 
     const following = await user.following;
 
-    const posts = await Post.find({ postedBy: { $in: following } });
+    const posts = await Post.find({ postedBy: { $in: following } }).populate({
+      path: "postedBy",
+      select: "name username image",
+    });
 
     res.json({ success: true, posts });
   } catch (err) {
@@ -179,4 +210,5 @@ export {
   replies,
   getFeed,
   getUserPost,
+  getPosts,
 };

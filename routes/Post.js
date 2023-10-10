@@ -5,6 +5,7 @@ import {
   deletePost,
   getFeed,
   getPost,
+  getPosts,
   getUserPost,
   likeAndUnlike,
   replies,
@@ -15,6 +16,7 @@ import userProtect from "../middlewares/protect.js";
 const router = Router();
 
 router
+  .get("/posts", getPosts)
   .get("/feed", userProtect, getFeed)
   .get("/user-post/:id", getUserPost)
   .get("/:_id", getPost)
