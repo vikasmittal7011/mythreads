@@ -97,15 +97,47 @@ const likeAndUnlike = async (req, res, next) => {
 
     const isLikes = post.likes.includes(req.id);
 
-    if (isLikes) {
-      await Post.findByIdAndUpdate({ _id }, { $pull: { likes: id } });
-      res.json({ message: "Post unlike successfully", success: true });
-    } else {
-      await Post.findByIdAndUpdate({ _id }, { $push: { likes: id } });
-      res.json({ message: "Post like successfully", success: true });
-    }
+    let updatedPost;
 
-    res.json({ success: true, post });
+    if (isLikes) {
+      updatedPost = await Post.findByIdAndUpdate(
+        { _id },
+        { $pull: { likes: id } },
+        { new: true }
+      )
+        .populate({
+          path: "postedBy",
+          select: "name username image",
+        })
+        .populate({
+          path: "replies.userId",
+          select: "name image",
+        });
+      res.json({
+        message: "Post unlike successfully",
+        success: true,
+        post: updatedPost,
+      });
+    } else {
+      updatedPost = await Post.findByIdAndUpdate(
+        { _id },
+        { $push: { likes: id } },
+        { new: true }
+      )
+        .populate({
+          path: "postedBy",
+          select: "name username image",
+        })
+        .populate({
+          path: "replies.userId",
+          select: "name image",
+        });
+      res.json({
+        message: "Post like successfully",
+        success: true,
+        post: updatedPost,
+      });
+    }
   } catch (err) {
     return next(new HttpError(err.message, 500));
   }
