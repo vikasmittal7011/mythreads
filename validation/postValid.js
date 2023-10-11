@@ -5,7 +5,7 @@ export const createPostsValiation = [
     .not()
     .isEmpty()
     .isLength({ min: 8, max: 500 })
-    .withMessage("Enter something about post"),
+    .withMessage("Entered text must be greater then 8 char"),
 ];
 
 export const createRepliesValiation = [
@@ -13,5 +13,5 @@ export const createRepliesValiation = [
     .not()
     .isEmpty()
     .isLength({ min: 8, max: 150 })
-    .withMessage("Enter something about post"),
+    .withMessage("Entered text must be greater then 8 char"),
 ];

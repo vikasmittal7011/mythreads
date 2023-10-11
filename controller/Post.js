@@ -82,6 +82,7 @@ const createPost = async (req, res, next) => {
 
     res.json({ success: true, post, username: user.username });
   } catch (err) {
+    console.log(err);
     return next(new HttpError(err.message, 500));
   }
 };
@@ -160,15 +161,24 @@ const replies = async (req, res, next) => {
 
     if (!post) return next(new HttpError("Post not found", 404));
 
-    const allReplies = [replie, ...post.replies];
+    if (!text)
+      return next(new HttpError("Text must container some values", 400));
 
-    console.log({ replies: allReplies });
+    const allReplies = [replie, ...post.replies];
 
     const updatePost = await Post.findByIdAndUpdate(
       { _id },
       { replies: allReplies },
       { new: true }
-    );
+    )
+      .populate({
+        path: "postedBy",
+        select: "name username image",
+      })
+      .populate({
+        path: "replies.userId",
+        select: "name image",
+      });
 
     if (!updatePost)
       return next(new HttpError("Can't able to post replie", 400));
@@ -186,6 +196,11 @@ const deletePost = async (req, res, next) => {
     const post = await Post.findById({ _id });
 
     if (!post) return next(new HttpError("Post not found", 404));
+
+    if (post.img) {
+      const imgId = post.img.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(imgId);
+    }
 
     if (post.postedBy.toString() !== req.id)
       return next(new HttpError("You can't delete this post", 401));
@@ -223,10 +238,12 @@ const getUserPost = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const posts = await Post.find({ postedBy: id }).populate({
-      path: "postedBy",
-      select: "name username image",
-    });
+    const posts = await Post.find({ postedBy: id })
+      .populate({
+        path: "postedBy",
+        select: "name username image",
+      })
+      .sort({ createdAt: -1 });
 
     res.json({ success: true, posts });
   } catch (err) {
