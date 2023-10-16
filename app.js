@@ -8,7 +8,7 @@ dotenv.config();
 
 import { connection } from "./utils/connection.js";
 
-const app = express();
+import { app, server } from "./socket/socket.js";
 
 import user from "./routes/User.js";
 import post from "./routes/Post.js";
@@ -44,4 +44,4 @@ app.use((error, req, res, next) => {
     .json({ message: error.message || "Unknow error accour" });
 });
 
-app.listen(5000);
+server.listen(5000);
