@@ -12,11 +12,12 @@ const app = express();
 
 import user from "./routes/User.js";
 import post from "./routes/Post.js";
+import message from "./routes/Message.js";
 import HttpError from "./modals/http-error.js";
 
 connection();
 
-app.use(json({ limit: "10mb" }));
+app.use(json({ limit: "50mb" }));
 app.use(cookieparser());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
@@ -28,6 +29,7 @@ cloundinary.config({
 
 app.use("/api/user", user);
 app.use("/api/post", post);
+app.use("/api/message", message);
 
 app.use((req, res, next) => {
   next(new HttpError("Not route found", 404));

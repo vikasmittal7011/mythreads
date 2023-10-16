@@ -82,7 +82,6 @@ const createPost = async (req, res, next) => {
 
     res.json({ success: true, post, username: user.username });
   } catch (err) {
-    console.log(err);
     return next(new HttpError(err.message, 500));
   }
 };

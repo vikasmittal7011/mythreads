@@ -35,4 +35,4 @@ ConversationSehema.set("toJSON", {
   },
 });
 
-export const Post = model("Conversation", ConversationSehema);
+export const Conversation = model("Conversation", ConversationSehema);
