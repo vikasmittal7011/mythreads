@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import HttpError from "../modals/http-error.js";
 import { Message } from "../modals/Message.js";
 import { Conversation } from "../modals/Conversation.js";
+import { getRecipientUserId, io } from "../socket/socket.js";
 
 const sendMessage = async (req, res, next) => {
   try {
@@ -33,6 +34,10 @@ const sendMessage = async (req, res, next) => {
     await conversation.updateOne({
       lastMessage: { text: message, sender: senderId },
     });
+
+    const recipientSocketId = getRecipientUserId(recipientId);
+
+    if (recipientId) io.to(recipientSocketId).emit("newMessage", newMessage);
 
     res.json({ message: newMessage, success: true });
   } catch (error) {

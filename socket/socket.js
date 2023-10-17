@@ -28,4 +28,6 @@ io.on("connection", (socket) => {
   });
 });
 
-export { io, server, app };
+const getRecipientUserId = (recipient) => userSocketMap[recipient];
+
+export { io, server, app, getRecipientUserId };
