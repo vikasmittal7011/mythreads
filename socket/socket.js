@@ -1,8 +1,10 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
-
 const app = express();
+
+import { Message } from "../modals/Message.js";
+import { Conversation } from "../modals/Conversation.js";
 
 const server = http.createServer(app);
 
@@ -21,6 +23,23 @@ io.on("connection", (socket) => {
   if (userId !== "undefined") userSocketMap[userId] = socket.id;
 
   io.emit("getOnlineUser", Object.keys(userSocketMap));
+
+  socket.on("markMessageAsSeen", async ({ conversationId, userId }) => {
+    try {
+      await Message.updateMany(
+        { conversationId, seen: false },
+        { $set: { seen: true } },
+        { new: true }
+      );
+      await Conversation.updateOne(
+        { _id: conversationId },
+        { $set: { "lastMessage.seen": true } }
+      );
+      io.to(userSocketMap[userId]).emit("messageSeen", { conversationId });
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
   socket.on("disconnect", () => {
     delete userSocketMap[userId];
