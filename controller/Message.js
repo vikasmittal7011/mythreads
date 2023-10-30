@@ -1,18 +1,19 @@
-import { validationResult } from "express-validator";
-
 import HttpError from "../modals/http-error.js";
 import { Message } from "../modals/Message.js";
 import { Conversation } from "../modals/Conversation.js";
 import { getRecipientUserId, io } from "../socket/socket.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const sendMessage = async (req, res, next) => {
   try {
-    const { recipientId, message } = req.body;
+    const { recipientId, message, imgUrl } = req.body;
     const senderId = req.id;
 
     let conversation = await Conversation.findOne({
       participants: { $all: [senderId, recipientId] },
     });
+
+    let imageUrl;
 
     if (!conversation) {
       conversation = new Conversation({
@@ -23,16 +24,22 @@ const sendMessage = async (req, res, next) => {
       await conversation.save();
     }
 
+    if (imgUrl) {
+      const cloundinaryResponse = await cloudinary.uploader.upload(imgUrl);
+      imageUrl = cloundinaryResponse.secure_url;
+    }
+
     const newMessage = new Message({
       sender: senderId,
-      text: message,
+      text: message || "",
+      img: imageUrl || "",
       conversationId: conversation.id,
     });
 
     await newMessage.save();
 
     await conversation.updateOne({
-      lastMessage: { text: message, sender: senderId },
+      lastMessage: { text: message || "Image", sender: senderId },
     });
 
     const recipientSocketId = getRecipientUserId(recipientId);
@@ -41,7 +48,6 @@ const sendMessage = async (req, res, next) => {
 
     res.json({ message: newMessage, success: true });
   } catch (error) {
-    error;
     next(new HttpError(error.message, 500));
   }
 };

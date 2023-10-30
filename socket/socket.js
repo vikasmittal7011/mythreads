@@ -36,9 +36,7 @@ io.on("connection", (socket) => {
         { $set: { "lastMessage.seen": true } }
       );
       io.to(userSocketMap[userId]).emit("messageSeen", { conversationId });
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   });
 
   socket.on("disconnect", () => {

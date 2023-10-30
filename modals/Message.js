@@ -8,9 +8,10 @@ const MessageSehema = Schema(
       ref: "User",
       required: true,
     },
-    text: { type: String, required: true, maxLength: 500 },
+    text: { type: String, maxLength: 500 },
     conversationId: { type: ObjectId, ref: "Conversation", required: true },
     seen: { type: Boolean, default: false },
+    img: { type: String, default: "" },
   },
   { timestamps: true }
 );
