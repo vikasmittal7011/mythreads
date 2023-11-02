@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   followUnfollowUser,
   getProfile,
+  getSuggestedUser,
   getUserProfile,
   loginUser,
   logoutUser,
@@ -17,6 +18,7 @@ const router = Router();
 router
   .get("/profile", userProtect, getUserProfile)
   .get("/profile/:username", getProfile)
+  .get("/suggested/user", userProtect, getSuggestedUser)
   .post("/", createUserValiation, signupUser)
   .post("/login", loginUser)
   .post("/logout", logoutUser)

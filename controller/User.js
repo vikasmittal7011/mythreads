@@ -5,6 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { User } from "../modals/User.js";
 import HttpError from "../modals/http-error.js";
 import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookies.js";
+import mongoose from "mongoose";
 
 const salt = process.env.SALT;
 
@@ -202,6 +203,37 @@ const getUserProfile = async (req, res, next) => {
   }
 };
 
+const getSuggestedUser = async (req, res, next) => {
+  try {
+    const _id = req.id;
+
+    const usersFollowedByYou = await User.findById({ _id }).select("following");
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: { $ne: new mongoose.Types.ObjectId(_id) },
+        },
+      },
+      {
+        $sample: { size: 10 },
+      },
+    ]);
+
+    const filteredUsers = users.filter(
+      (user) => !usersFollowedByYou.following.includes(user._id)
+    );
+
+    const suggestedUser = filteredUsers.splice(0, 4);
+
+    suggestedUser.map((user) => (user.password = ""));
+
+    res.json({ users: suggestedUser, success: true });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
 export {
   signupUser,
   loginUser,
@@ -210,4 +242,5 @@ export {
   updateUser,
   getProfile,
   getUserProfile,
+  getSuggestedUser,
 };
