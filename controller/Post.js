@@ -12,7 +12,7 @@ const getPost = async (req, res, next) => {
     const post = await Post.findById({ _id })
       .populate({
         path: "postedBy",
-        select: "name username image",
+        select: "name username image freeze",
       })
       .populate({
         path: "replies.userId",
@@ -20,6 +20,8 @@ const getPost = async (req, res, next) => {
       });
 
     if (!post) return next(new HttpError("Post not found", 404));
+
+    if (post.postedBy.freeze) return next(new HttpError("Post not found", 404));
 
     res.json({ success: true, post });
   } catch (err) {
@@ -32,7 +34,7 @@ const getPosts = async (req, res, next) => {
     const posts = await Post.find()
       .populate({
         path: "postedBy",
-        select: "name username image",
+        select: "name username image freeze",
       })
       .populate({
         path: "replies.userId",
@@ -40,7 +42,9 @@ const getPosts = async (req, res, next) => {
       })
       .sort({ createdAt: "-1" });
 
-    const shuffledPosts = [...posts];
+    const filteredPosts = posts.filter((post) => !post.postedBy.freeze && post);
+
+    const shuffledPosts = [...filteredPosts];
     for (let i = shuffledPosts.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffledPosts[i], shuffledPosts[j]] = [
@@ -224,10 +228,12 @@ const getFeed = async (req, res, next) => {
 
     const posts = await Post.find({ postedBy: { $in: following } }).populate({
       path: "postedBy",
-      select: "name username image",
+      select: "name username image freeze",
     });
 
-    res.json({ success: true, posts });
+    const filteredPosts = posts.filter((post) => !post.postedBy.freeze && post);
+
+    res.json({ success: true, posts: filteredPosts });
   } catch (err) {
     return next(new HttpError(err.message, 500));
   }

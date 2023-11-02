@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   followUnfollowUser,
+  freezeAccount,
   getProfile,
   getSuggestedUser,
   getUserProfile,
@@ -23,6 +24,7 @@ router
   .post("/login", loginUser)
   .post("/logout", logoutUser)
   .patch("/followUser/:id", userProtect, followUnfollowUser)
-  .patch("/update", userProtect, updateUser);
+  .patch("/update", userProtect, updateUser)
+  .patch("/freeze", userProtect, freezeAccount);
 
 export default router;

@@ -83,7 +83,7 @@ const followUnfollowUser = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const modifyingUser = await User.findById({ _id: id });
+    const modifyingUser = await User.findById({ _id: id, freeze: false });
     const modifyerUser = await User.findById({ _id: req.id });
 
     if (id === req.id)
@@ -113,6 +113,10 @@ const followUnfollowUser = async (req, res, next) => {
         { _id: req.id },
         { $push: { following: id } }
       );
+
+      modifyingUser.verified =
+        modifyingUser.followers.length + 1 > 10 ? true : false;
+
       res.json({ success: true });
     }
   } catch (err) {
@@ -177,7 +181,11 @@ const getProfile = async (req, res, next) => {
   try {
     const { username } = req.params;
 
-    const user = await User.findOne({ username }).select("-passwrod");
+    const user = await User.findOne({ username, freeze: false }).select(
+      "-password"
+    );
+
+    console.log(user);
 
     if (!user) return next(new HttpError("User not found", 404));
 
@@ -213,6 +221,7 @@ const getSuggestedUser = async (req, res, next) => {
       {
         $match: {
           _id: { $ne: new mongoose.Types.ObjectId(_id) },
+          freeze: { $ne: true },
         },
       },
       {
@@ -234,6 +243,26 @@ const getSuggestedUser = async (req, res, next) => {
   }
 };
 
+const freezeAccount = async (req, res, next) => {
+  try {
+    const _id = req.id;
+
+    const user = await User.findById({ _id }).select("-password");
+
+    if (!user) {
+      new HttpError("Account not found", 404);
+    }
+
+    user.freeze = !user.freeze;
+
+    await user.save();
+
+    res.json({ success: true, user });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
 export {
   signupUser,
   loginUser,
@@ -243,4 +272,5 @@ export {
   getProfile,
   getUserProfile,
   getSuggestedUser,
+  freezeAccount,
 };
