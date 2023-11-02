@@ -81,7 +81,10 @@ const getConversations = async (req, res, next) => {
 
     const conversations = await Conversation.find({
       participants: sender,
-    }).populate({ path: "participants", select: "username image name" });
+    }).populate({
+      path: "participants",
+      select: "username image name verified",
+    });
 
     if (!conversations)
       return next(new HttpError("Conversation Not Found", 404));

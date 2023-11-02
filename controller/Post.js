@@ -12,7 +12,7 @@ const getPost = async (req, res, next) => {
     const post = await Post.findById({ _id })
       .populate({
         path: "postedBy",
-        select: "name username image freeze",
+        select: "name username image freeze verified",
       })
       .populate({
         path: "replies.userId",
@@ -34,7 +34,7 @@ const getPosts = async (req, res, next) => {
     const posts = await Post.find()
       .populate({
         path: "postedBy",
-        select: "name username image freeze",
+        select: "name username image freeze verified",
       })
       .populate({
         path: "replies.userId",
@@ -111,7 +111,7 @@ const likeAndUnlike = async (req, res, next) => {
       )
         .populate({
           path: "postedBy",
-          select: "name username image",
+          select: "name username image verified",
         })
         .populate({
           path: "replies.userId",
@@ -130,7 +130,7 @@ const likeAndUnlike = async (req, res, next) => {
       )
         .populate({
           path: "postedBy",
-          select: "name username image",
+          select: "name username image verified",
         })
         .populate({
           path: "replies.userId",
@@ -176,7 +176,7 @@ const replies = async (req, res, next) => {
     )
       .populate({
         path: "postedBy",
-        select: "name username image",
+        select: "name username image verified",
       })
       .populate({
         path: "replies.userId",
@@ -228,7 +228,7 @@ const getFeed = async (req, res, next) => {
 
     const posts = await Post.find({ postedBy: { $in: following } }).populate({
       path: "postedBy",
-      select: "name username image freeze",
+      select: "name username image freeze verified",
     });
 
     const filteredPosts = posts.filter((post) => !post.postedBy.freeze && post);
@@ -246,7 +246,7 @@ const getUserPost = async (req, res, next) => {
     const posts = await Post.find({ postedBy: id })
       .populate({
         path: "postedBy",
-        select: "name username image",
+        select: "name username image verified",
       })
       .sort({ createdAt: -1 });
 
