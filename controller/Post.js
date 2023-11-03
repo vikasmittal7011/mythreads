@@ -256,6 +256,24 @@ const getUserPost = async (req, res, next) => {
   }
 };
 
+const rePost = async (req, res, next) => {
+  try {
+    const { text, img } = req.body;
+    const id = req.id;
+
+    const post = new Post({ text, postedBy: id, img });
+
+    await post.save();
+
+    if (!post)
+      return next(new HttpError("Connot able to add post try again", 400));
+
+    res.json({ success: true, post });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
 export {
   createPost,
   getPost,
@@ -265,4 +283,5 @@ export {
   getFeed,
   getUserPost,
   getPosts,
+  rePost,
 };

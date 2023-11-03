@@ -8,6 +8,7 @@ import {
   getPosts,
   getUserPost,
   likeAndUnlike,
+  rePost,
   replies,
 } from "../controller/Post.js";
 import {
@@ -24,6 +25,7 @@ router
   .get("/user-post/:id", getUserPost)
   .get("/:_id", getPost)
   .post("/", userProtect, createPostsValiation, createPost)
+  .post("/repost", userProtect, rePost)
   .patch("/toggleLike/:_id", userProtect, likeAndUnlike)
   .patch("/replie/:_id", userProtect, createRepliesValiation, replies)
   .delete("/:_id", userProtect, deletePost);
