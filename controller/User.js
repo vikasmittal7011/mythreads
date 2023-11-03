@@ -263,6 +263,35 @@ const freezeAccount = async (req, res, next) => {
   }
 };
 
+const searchUser = async (req, res, next) => {
+  try {
+    const _id = req.id;
+    const { name } = req.params;
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: { $ne: new mongoose.Types.ObjectId(_id) },
+          freeze: { $ne: true },
+          $or: [
+            { name: { $in: regexForValues([name]) } },
+            { username: { $in: regexForValues([name]) } },
+          ],
+        },
+      },
+    ]);
+
+    users.map((user) => (user.password = ""));
+
+    res.json({ users, success: true });
+  } catch (err) {
+    return next(new HttpError(err.message, 500));
+  }
+};
+
+const regexForValues = (values) =>
+  values.map((value) => new RegExp(value, "i"));
+
 export {
   signupUser,
   loginUser,
@@ -273,4 +302,5 @@ export {
   getUserProfile,
   getSuggestedUser,
   freezeAccount,
+  searchUser,
 };

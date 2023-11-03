@@ -8,6 +8,7 @@ import {
   getUserProfile,
   loginUser,
   logoutUser,
+  searchUser,
   signupUser,
   updateUser,
 } from "../controller/User.js";
@@ -19,6 +20,7 @@ const router = Router();
 router
   .get("/profile", userProtect, getUserProfile)
   .get("/profile/:username", getProfile)
+  .get("/searchuser/:name", userProtect, searchUser)
   .get("/suggested/user", userProtect, getSuggestedUser)
   .post("/", createUserValiation, signupUser)
   .post("/login", loginUser)
