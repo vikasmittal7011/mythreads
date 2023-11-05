@@ -185,8 +185,6 @@ const getProfile = async (req, res, next) => {
       "-password"
     );
 
-    console.log(user);
-
     if (!user) return next(new HttpError("User not found", 404));
 
     res.json({ success: true, user });
